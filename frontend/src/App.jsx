@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
-
+import ServiceRequestsPage from './pages/ServiceRequestsPage';
 function ModulePlaceholder({ title, story }) {
   return (
     <div className="card">
@@ -37,15 +37,7 @@ export default function App() {
               />
             }
           />
-          <Route
-            path="requests"
-            element={
-              <ModulePlaceholder
-                title="طلبات الصيانة والتقييم"
-                story="EPIC-03: US-301, US-302 & US-303"
-              />
-            }
-          />
+          <Route path="requests" element={<ServiceRequestsPage />} />
           <Route
             path="admin"
             element={

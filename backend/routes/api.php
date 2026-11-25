@@ -9,6 +9,7 @@ Route::get('/user', function (Request $request) {
 
 
 use App\Http\Controllers\Api\PlatformController;
+use App\Http\Controllers\Api\ServiceRequestController;
 
 // نقطة البداية والصفحة الرئيسية للمنصة (US-101)
 Route::get('/home', [PlatformController::class, 'home']);
@@ -17,3 +18,4 @@ Route::get('/home', [PlatformController::class, 'home']);
 // - وحدة التخصصات (EPIC-01): /api/professions
 // - وحدة الفنيين والتوثيق (EPIC-02): /api/workers
 // - وحدة طلبات الصيانة والتقييم (EPIC-03): /api/service-requests
+Route::post('/service-requests', [ServiceRequestController::class, 'store']);
