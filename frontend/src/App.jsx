@@ -42,6 +42,7 @@ export default function App() {
             path="admin"
             element={
               <ModulePlaceholder
+              
                 title="لوحة إدارة المنصة"
                 story="Admin Dashboard — EPIC-01 & EPIC-02"
               />
