@@ -1,14 +1,20 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
+import WorkerRegisterPage from './pages/WorkerRegisterPage';
 
-function ModulePlaceholder({ title, story }) {
+function ModulePlaceholder({ title, story, actionTo, actionLabel }) {
   return (
     <div className="card">
       <h2 style={{ marginBottom: 8 }}>{title}</h2>
-      <p style={{ color: 'var(--text-muted)' }}>
+      <p style={{ color: 'var(--text-muted)', marginBottom: actionTo ? 18 : 0 }}>
         نقطة التكامل جاهزة — سيتم بناء هذه الوحدة ضمن قصة ({story}).
       </p>
+      {actionTo && (
+        <Link to={actionTo} className="nav-cta" style={{ display: 'inline-block' }}>
+          {actionLabel}
+        </Link>
+      )}
     </div>
   );
 }
@@ -34,9 +40,12 @@ export default function App() {
               <ModulePlaceholder
                 title="دليل الفنيين والمهندسين الموثقين"
                 story="EPIC-02: US-201 & US-202"
+                actionTo="/workers/register"
+                actionLabel="+ تسجيل حساب فني أو مهندس جديد"
               />
             }
           />
+          <Route path="workers/register" element={<WorkerRegisterPage />} />
           <Route
             path="requests"
             element={

@@ -1,0 +1,354 @@
+.worker-register-page,
+.worker-register-page * {
+  box-sizing: border-box;
+}
+
+.worker-register-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.register-hero {
+  background: radial-gradient(circle at top left, #1e40af 0%, #0f172a 75%);
+  color: #ffffff;
+  border-radius: 24px;
+  padding: 36px 34px;
+  box-shadow: var(--shadow-md);
+}
+
+.register-hero h1 {
+  font-size: clamp(1.35rem, 3vw, 2.1rem);
+  font-weight: 800;
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.register-hero p {
+  color: #cbd5e1;
+  max-width: 720px;
+  font-size: 0.96rem;
+}
+
+.register-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.85fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.register-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+  width: 100%;
+}
+
+.register-card-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.register-card-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 22px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--navy);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.required-star {
+  color: #dc2626;
+}
+
+.optional-tag {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.form-control {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background: #f8fafc;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.form-control.is-invalid {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.field-error {
+  color: #b91c1c;
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+
+.upload-box {
+  border: 1.5px dashed #94a3b8;
+  border-radius: 14px;
+  padding: 16px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.upload-box:hover {
+  border-color: var(--primary);
+  background: #eff6ff;
+}
+
+.upload-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.upload-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.avatar-preview {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+
+.upload-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.upload-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--navy);
+  overflow-wrap: anywhere;
+}
+
+.upload-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 16px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.file-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.hidden-input {
+  display: none;
+}
+
+.btn-primary-submit {
+  width: 100%;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.98rem;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.36);
+}
+
+.btn-primary-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.alert-box {
+  padding: 14px 16px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.alert-success {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.alert-error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.guide-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+}
+
+.guide-step h4 {
+  font-size: 0.94rem;
+  color: var(--navy);
+  margin-bottom: 3px;
+}
+
+.guide-step p {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+}
+
+.status-note {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+/* الأجهزة اللوحية والشاشات المتوسطة */
+@media (max-width: 960px) {
+  .register-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* شاشات الهواتف والنوافذ الضيقة */
+@media (max-width: 768px) {
+  .register-hero {
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+
+  .register-hero p {
+    font-size: 0.9rem;
+  }
+
+  .register-card {
+    padding: 18px 16px;
+    border-radius: 14px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .upload-box {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+  }
+
+  .file-btn {
+    width: 100%;
+    padding: 10px 14px;
+  }
+
+  .btn-primary-submit {
+    font-size: 0.94rem;
+    padding: 13px 16px;
+  }
+}
