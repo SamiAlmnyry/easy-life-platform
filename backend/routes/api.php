@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\ProfessionController;
 use App\Http\Controllers\Api\PlatformController;
 use App\Http\Controllers\Api\WorkerController;
 use Illuminate\Http\Request;
@@ -18,5 +18,8 @@ Route::prefix('workers')->group(function () {
 });
 
 // نقاط التكامل المستقبلية لوحدات الفريق:
-// - وحدة التخصصات (EPIC-01): /api/professions
-// - وحدة طلبات الصيانة والتقييم (EPIC-03): /api/service-requests
+// وحدة التخصصات والمهن (EPIC-01): /api/professions
+Route::prefix('professions')->group(function () {
+    Route::get('/', [ProfessionController::class, 'index']);
+    Route::post('/', [ProfessionController::class, 'store']);
+});

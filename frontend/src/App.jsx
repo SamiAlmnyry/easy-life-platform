@@ -2,6 +2,7 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import WorkerRegisterPage from './pages/WorkerRegisterPage';
+import ProfessionsPage from './pages/ProfessionsPage';
 
 function ModulePlaceholder({ title, story, actionTo, actionLabel }) {
   return (
@@ -25,15 +26,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
-          <Route
-            path="professions"
-            element={
-              <ModulePlaceholder
-                title="إدارة واستعراض التخصصات"
-                story="EPIC-01: US-102 & US-103"
-              />
-            }
-          />
+          <Route path="professions" element={<ProfessionsPage />} />
           <Route
             path="workers"
             element={
