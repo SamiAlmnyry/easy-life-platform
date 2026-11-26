@@ -12,11 +12,75 @@ use Illuminate\Support\Facades\Validator;
 class ServiceRequestController extends Controller
 {
     /**
-     * إنشاء طلب عمل أو صيانة جديد (SCRUM-30 / US-301)
+     * استعراض قائمة الطلبات مع التصفية (US-302 / SCRUM-31)
+     */
+    public function index(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'worker_id'    => ['nullable', 'integer', 'min:1'],
+            'client_phone' => ['nullable', 'string', 'max:20'],
+            'status'       => ['nullable', 'in:pending,accepted,rejected,completed'],
+        ], [
+            'worker_id.integer' => 'رقم الفني يجب أن يكون رقماً صحيحاً.',
+            'status.in'         => 'حالة الطلب غير صالحة.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'معايير البحث غير صحيحة.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $query = ServiceRequest::query()->orderByDesc('created_at');
+
+        if ($request->filled('worker_id')) {
+            $query->where('worker_id', $request->worker_id);
+        }
+
+        if ($request->filled('client_phone')) {
+            $query->where('client_phone', 'like', '%' . trim($request->client_phone) . '%');
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $requests = $query->get();
+
+        return response()->json([
+            'status' => true,
+            'count'  => $requests->count(),
+            'data'   => $requests,
+        ], 200);
+    }
+
+    /**
+     * استعراض تفاصيل طلب واحد وحالته (US-302 / SCRUM-31)
+     */
+    public function show($id)
+    {
+        $serviceRequest = ServiceRequest::find($id);
+
+        if (!$serviceRequest) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'الطلب المطلوب غير موجود.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data'   => $serviceRequest,
+        ], 200);
+    }
+
+    /**
+     * إنشاء طلب عمل أو صيانة جديد (US-301 / SCRUM-30)
      */
     public function store(Request $request)
     {
-        // 1. التحقق من الحقول المطلوبة وصحة رقم الهاتف
         $validator = Validator::make($request->all(), [
             'worker_id'           => ['required', 'integer', 'min:1'],
             'client_name'         => ['required', 'string', 'min:2', 'max:120'],
@@ -41,7 +105,6 @@ class ServiceRequestController extends Controller
             ], 422);
         }
 
-        // 2. التحقق من أن الفني موجود وموثق (is_verified = true)
         if (Schema::hasTable('workers')) {
             $worker = DB::table('workers')->where('id', $request->worker_id)->first();
 
@@ -60,7 +123,6 @@ class ServiceRequestController extends Controller
             }
         }
 
-        // 3. حفظ الطلب بحالة قيد الانتظار (pending) افتراضياً
         $serviceRequest = ServiceRequest::create([
             'worker_id'           => $request->worker_id,
             'client_name'         => trim($request->client_name),

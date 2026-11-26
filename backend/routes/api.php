@@ -25,4 +25,5 @@ Route::prefix('workers')->group(function () {
 // - وحدة الفنيين والتوثيق (EPIC-02): /api/workers
 // - وحدة طلبات الصيانة والتقييم (EPIC-03): /api/service-requests
 Route::post('/service-requests', [ServiceRequestController::class, 'store']);
-// - وحدة طلبات الصيانة والتقييم (EPIC-03): /api/service-requests
+Route::get('/service-requests', [ServiceRequestController::class, 'index']);
+Route::get('/service-requests/{id}', [ServiceRequestController::class, 'show']);
