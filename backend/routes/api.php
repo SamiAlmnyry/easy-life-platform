@@ -31,4 +31,8 @@ Route::get('/service-requests/{id}', [ServiceRequestController::class, 'show']);
 Route::prefix('professions')->group(function () {
     Route::get('/', [ProfessionController::class, 'index']);
     Route::post('/', [ProfessionController::class, 'store']);
+    Route::put('/{profession}', [ProfessionController::class, 'update']);
+    Route::patch('/{profession}/toggle', [ProfessionController::class, 'toggleStatus']);
+    Route::delete('/{profession}', [ProfessionController::class, 'destroy']);
 });
+
