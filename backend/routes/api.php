@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\ProfessionController;
 use App\Http\Controllers\Api\PlatformController;
 use App\Http\Controllers\Api\WorkerController;
 use Illuminate\Http\Request;
@@ -30,3 +30,8 @@ Route::get('/service-requests/{id}', [ServiceRequestController::class, 'show']);
 Route::patch('/service-requests/{id}/status', [ServiceRequestController::class, 'updateStatus']);
 Route::patch('/service-requests/{id}/cancel', [ServiceRequestController::class, 'cancel']);
 Route::post('/service-requests/{id}/review', [ServiceRequestController::class, 'submitReview']);
+// وحدة التخصصات والمهن (EPIC-01): /api/professions
+Route::prefix('professions')->group(function () {
+    Route::get('/', [ProfessionController::class, 'index']);
+    Route::post('/', [ProfessionController::class, 'store']);
+});
