@@ -7,6 +7,7 @@ const STATUS_META = {
   accepted: { label: 'مقبول وجاري التنفيذ', bg: '#dbeafe', color: '#1e40af', border: '#93c5fd' },
   rejected: { label: 'مرفوض', bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
   completed: { label: 'مكتمل', bg: '#dcfce7', color: '#166534', border: '#86efac' },
+  cancelled: { label: 'ملغي', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' },
 };
 
 export default function ServiceRequestsPage() {
@@ -32,6 +33,13 @@ export default function ServiceRequestsPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+
+  // حالات تحديث الحالة، الإلغاء، والتقييم (US-303)
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState(null);
+  const [cancelPhone, setCancelPhone] = useState('');
+  const [ratingValue, setRatingValue] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
 
   const fetchRequests = async (phone = filterPhone, status = filterStatus) => {
     setLoadingList(true);
@@ -65,6 +73,10 @@ export default function ServiceRequestsPage() {
 
   const handleViewDetails = async (id) => {
     setLoadingDetails(true);
+    setActionFeedback(null);
+    setCancelPhone('');
+    setRatingValue(5);
+    setReviewComment('');
     try {
       const response = await fetch(`${API_BASE}/service-requests/${id}`);
       const data = await response.json();
@@ -72,11 +84,110 @@ export default function ServiceRequestsPage() {
         setSelectedRequest(data.data);
       }
     } catch {
-      // في حال فشل الاتصال نعرض النسخة المتوفرة محلياً
       const fallback = requests.find((item) => item.id === id);
       if (fallback) setSelectedRequest(fallback);
     } finally {
       setLoadingDetails(false);
+    }
+  };
+
+  // تحديث حالة الطلب (قبول / رفض / إكمال)
+  const handleStatusUpdate = async (newStatus) => {
+    if (!selectedRequest) return;
+    setActionLoading(true);
+    setActionFeedback(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/service-requests/${selectedRequest.id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        setSelectedRequest(data.data);
+        setActionFeedback({ type: 'success', text: data.message });
+        fetchRequests();
+      } else {
+        setActionFeedback({ type: 'error', text: data.message || 'تعذر تحديث حالة الطلب.' });
+      }
+    } catch {
+      setActionFeedback({ type: 'error', text: 'تعذر الاتصال بالخادم.' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // إلغاء الطلب من طرف العميل
+  const handleCancelRequest = async (e) => {
+    e.preventDefault();
+    if (!selectedRequest) return;
+    setActionLoading(true);
+    setActionFeedback(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/service-requests/${selectedRequest.id}/cancel`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ client_phone: cancelPhone }),
+      });
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        setSelectedRequest(data.data);
+        setCancelPhone('');
+        setActionFeedback({ type: 'success', text: data.message });
+        fetchRequests();
+      } else {
+        setActionFeedback({ type: 'error', text: data.message || 'تعذر إلغاء الطلب.' });
+      }
+    } catch {
+      setActionFeedback({ type: 'error', text: 'تعذر الاتصال بالخادم.' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // إرسال التقييم والتعليق بعد اكتمال الخدمة
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedRequest) return;
+    setActionLoading(true);
+    setActionFeedback(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/service-requests/${selectedRequest.id}/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          rating: Number(ratingValue),
+          review_comment: reviewComment,
+        }),
+      });
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        setSelectedRequest(data.data);
+        setReviewComment('');
+        setActionFeedback({ type: 'success', text: data.message });
+        fetchRequests();
+      } else {
+        setActionFeedback({ type: 'error', text: data.message || 'تعذر إرسال التقييم.' });
+      }
+    } catch {
+      setActionFeedback({ type: 'error', text: 'تعذر الاتصال بالخادم.' });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -188,7 +299,7 @@ export default function ServiceRequestsPage() {
             color: activeTab === 'list' ? '#ffffff' : '#334155',
           }}
         >
-          📋 استعراض الطلبات وحالتها (US-302)
+          📋 إدارة واستعراض الطلبات (US-302 & US-303)
         </button>
         <button
           type="button"
@@ -208,7 +319,7 @@ export default function ServiceRequestsPage() {
         </button>
       </div>
 
-      {/* القسم الأول: استعراض الطلبات وتفاصيلها وحالتها (US-302) */}
+      {/* القسم الأول: استعراض الطلبات وإدارة حالتها وتقييمها (US-302 & US-303) */}
       {activeTab === 'list' && (
         <div className="card">
           <div
@@ -224,7 +335,7 @@ export default function ServiceRequestsPage() {
             <div>
               <h2 style={{ marginBottom: 4 }}>سجل طلبات الصيانة والخدمات</h2>
               <p style={{ color: 'var(--text-muted)', margin: 0 }}>
-                تابع حالة طلباتك واطّلع على التفاصيل الكاملة لكل طلب.
+                تابع حالة طلباتك، حدّث حالة التنفيذ، أو أضف تقييمك بعد اكتمال الخدمة.
               </p>
             </div>
             <button
@@ -283,6 +394,7 @@ export default function ServiceRequestsPage() {
                 <option value="accepted">مقبول (Accepted)</option>
                 <option value="rejected">مرفوض (Rejected)</option>
                 <option value="completed">مكتمل (Completed)</option>
+                <option value="cancelled">ملغي (Cancelled)</option>
               </select>
             </div>
 
@@ -344,6 +456,11 @@ export default function ServiceRequestsPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                       <strong style={{ fontSize: 16 }}>طلب #{req.id}</strong>
                       {renderStatusBadge(req.status)}
+                      {req.rating && (
+                        <span style={{ fontSize: 13, color: '#d97706', fontWeight: 700 }}>
+                          ⭐ {req.rating}/5
+                        </span>
+                      )}
                     </div>
                     <p style={{ margin: '0 0 4px', fontWeight: 600 }}>
                       العميل: {req.client_name} ({req.client_phone})
@@ -373,14 +490,14 @@ export default function ServiceRequestsPage() {
                   >
                     {loadingDetails && selectedRequest?.id === req.id
                       ? 'جاري الفتح...'
-                      : 'عرض التفاصيل الكاملة'}
+                      : 'التفاصيل والإجراءات'}
                   </button>
                 </div>
               ))}
             </div>
           )}
 
-          {/* بطاقة عرض التفاصيل الكاملة للطلب المحدد */}
+          {/* بطاقة عرض التفاصيل الكاملة وإجراءات تحديث الحالة والإلغاء والتقييم (US-303) */}
           {selectedRequest && (
             <div
               style={{
@@ -400,7 +517,7 @@ export default function ServiceRequestsPage() {
                 }}
               >
                 <h3 style={{ margin: 0, color: '#115e59' }}>
-                  تفاصيل الطلب رقم #{selectedRequest.id}
+                  تفاصيل وإدارة الطلب رقم #{selectedRequest.id}
                 </h3>
                 <button
                   type="button"
@@ -415,9 +532,25 @@ export default function ServiceRequestsPage() {
                     fontWeight: 700,
                   }}
                 >
-                  ✕ إغلاق التفاصيل
+                  ✕ إغلاق
                 </button>
               </div>
+
+              {actionFeedback && (
+                <div
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    marginBottom: 14,
+                    backgroundColor: actionFeedback.type === 'success' ? '#dcfce7' : '#fee2e2',
+                    color: actionFeedback.type === 'success' ? '#166534' : '#991b1b',
+                    border: `1px solid ${actionFeedback.type === 'success' ? '#86efac' : '#fca5a5'}`,
+                    fontWeight: 600,
+                  }}
+                >
+                  {actionFeedback.text}
+                </div>
+              )}
 
               <div
                 style={{
@@ -463,6 +596,7 @@ export default function ServiceRequestsPage() {
                   padding: 14,
                   borderRadius: 8,
                   border: '1px solid #cbd5e1',
+                  marginBottom: 16,
                 }}
               >
                 <span style={{ display: 'block', fontSize: 13, color: '#475569', marginBottom: 4 }}>
@@ -470,6 +604,214 @@ export default function ServiceRequestsPage() {
                 </span>
                 <p style={{ margin: 0, lineHeight: 1.7 }}>{selectedRequest.problem_description}</p>
               </div>
+
+              {/* لوحة إجراءات الفني (تحديث الحالة) */}
+              {(selectedRequest.status === 'pending' || selectedRequest.status === 'accepted') && (
+                <div
+                  style={{
+                    background: '#ffffff',
+                    padding: 14,
+                    borderRadius: 8,
+                    border: '1px solid #cbd5e1',
+                    marginBottom: 14,
+                  }}
+                >
+                  <strong style={{ display: 'block', marginBottom: 8, color: '#0f172a' }}>
+                    🛠️ إجراءات الفني (تحديث حالة الطلب):
+                  </strong>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {selectedRequest.status === 'pending' && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={() => handleStatusUpdate('accepted')}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: '#2563eb',
+                            color: '#fff',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ✓ قبول الطلب
+                        </button>
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={() => handleStatusUpdate('rejected')}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: 8,
+                            border: 'none',
+                            background: '#dc2626',
+                            color: '#fff',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ✕ رفض الطلب
+                        </button>
+                      </>
+                    )}
+                    {selectedRequest.status === 'accepted' && (
+                      <button
+                        type="button"
+                        disabled={actionLoading}
+                        onClick={() => handleStatusUpdate('completed')}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: 8,
+                          border: 'none',
+                          background: '#16a34a',
+                          color: '#fff',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ✅ إكمال الخدمة
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* لوحة إلغاء الطلب من طرف العميل */}
+              {(selectedRequest.status === 'pending' || selectedRequest.status === 'accepted') && (
+                <form
+                  onSubmit={handleCancelRequest}
+                  style={{
+                    background: '#fffbeb',
+                    padding: 14,
+                    borderRadius: 8,
+                    border: '1px solid #fde68a',
+                    marginBottom: 14,
+                  }}
+                >
+                  <strong style={{ display: 'block', marginBottom: 6, color: '#92400e' }}>
+                    🚫 إلغاء الطلب (للعميل):
+                  </strong>
+                  <p style={{ margin: '0 0 10px', fontSize: 13, color: '#78350f' }}>
+                    أدخل رقم هاتفك المسجل في الطلب لتأكيد الإلغاء قبل اكتمال الخدمة:
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      value={cancelPhone}
+                      onChange={(e) => setCancelPhone(e.target.value)}
+                      placeholder="رقم هاتف العميل"
+                      required
+                      style={{
+                        flex: 1,
+                        minWidth: 180,
+                        padding: 8,
+                        borderRadius: 6,
+                        border: '1px solid #fcd34d',
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={actionLoading}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: 6,
+                        border: 'none',
+                        background: '#b45309',
+                        color: '#fff',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      تأكيد إلغاء الطلب
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* لوحة التقييم بعد اكتمال الخدمة (completed) */}
+              {selectedRequest.status === 'completed' && (
+                <div
+                  style={{
+                    background: '#ffffff',
+                    padding: 14,
+                    borderRadius: 8,
+                    border: '1px solid #cbd5e1',
+                  }}
+                >
+                  {selectedRequest.rating ? (
+                    <div>
+                      <strong style={{ display: 'block', marginBottom: 6, color: '#166534' }}>
+                        ⭐ تقييم العميل للخدمة:
+                      </strong>
+                      <div style={{ fontSize: 18, color: '#d97706', fontWeight: 700 }}>
+                        {'★'.repeat(selectedRequest.rating)}
+                        {'☆'.repeat(5 - selectedRequest.rating)} ({selectedRequest.rating} من 5)
+                      </div>
+                      {selectedRequest.review_comment && (
+                        <p style={{ margin: '6px 0 0', color: '#334155' }}>
+                          «{selectedRequest.review_comment}»
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <form onSubmit={handleReviewSubmit}>
+                      <strong style={{ display: 'block', marginBottom: 8, color: '#0f172a' }}>
+                        ⭐ قيّم جودة الخدمة بعد الاكتمال:
+                      </strong>
+                      <div style={{ display: 'grid', gap: 10 }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: 13, marginBottom: 4 }}>
+                            التقييم (من 1 إلى 5 نجوم):
+                          </label>
+                          <select
+                            value={ratingValue}
+                            onChange={(e) => setRatingValue(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: 8,
+                              borderRadius: 6,
+                              border: '1px solid #cbd5e1',
+                            }}
+                          >
+                            <option value="5">5 - ممتاز جداً ⭐⭐⭐⭐⭐</option>
+                            <option value="4">4 - جيد جداً ⭐⭐⭐⭐</option>
+                            <option value="3">3 - جيد ⭐⭐⭐</option>
+                            <option value="2">2 - مقبول ⭐⭐</option>
+                            <option value="1">1 - ضعيف ⭐</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: 13, marginBottom: 4 }}>
+                            تعليقك على الخدمة (اختياري):
+                          </label>
+                          <textarea
+                            rows="2"
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                            placeholder="اكتب ملاحظاتك حول التزام الفني وجودة العمل..."
+                            style={{
+                              width: '100%',
+                              padding: 8,
+                              borderRadius: 6,
+                              border: '1px solid #cbd5e1',
+                            }}
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={actionLoading}
+                          className="nav-cta"
+                          style={{ padding: '10px 16px', cursor: 'pointer' }}
+                        >
+                          إرسال التقييم
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

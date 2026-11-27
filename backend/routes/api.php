@@ -27,3 +27,6 @@ Route::prefix('workers')->group(function () {
 Route::post('/service-requests', [ServiceRequestController::class, 'store']);
 Route::get('/service-requests', [ServiceRequestController::class, 'index']);
 Route::get('/service-requests/{id}', [ServiceRequestController::class, 'show']);
+Route::patch('/service-requests/{id}/status', [ServiceRequestController::class, 'updateStatus']);
+Route::patch('/service-requests/{id}/cancel', [ServiceRequestController::class, 'cancel']);
+Route::post('/service-requests/{id}/review', [ServiceRequestController::class, 'submitReview']);
