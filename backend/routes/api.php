@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\ProfessionController;
 use App\Http\Controllers\Api\PlatformController;
 use App\Http\Controllers\Api\WorkerController;
 use Illuminate\Http\Request;
@@ -27,3 +27,8 @@ Route::prefix('workers')->group(function () {
 Route::post('/service-requests', [ServiceRequestController::class, 'store']);
 Route::get('/service-requests', [ServiceRequestController::class, 'index']);
 Route::get('/service-requests/{id}', [ServiceRequestController::class, 'show']);
+// وحدة التخصصات والمهن (EPIC-01): /api/professions
+Route::prefix('professions')->group(function () {
+    Route::get('/', [ProfessionController::class, 'index']);
+    Route::post('/', [ProfessionController::class, 'store']);
+});
