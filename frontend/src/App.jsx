@@ -1,6 +1,7 @@
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
+import ServiceRequestsPage from './pages/ServiceRequestsPage';
 import WorkerRegisterPage from './pages/WorkerRegisterPage';
 import ProfessionsPage from './pages/ProfessionsPage';
 
@@ -38,6 +39,7 @@ export default function App() {
               />
             }
           />
+          <Route path="requests" element={<ServiceRequestsPage />} />
           <Route path="workers/register" element={<WorkerRegisterPage />} />
           <Route
             path="requests"
@@ -52,6 +54,7 @@ export default function App() {
             path="admin"
             element={
               <ModulePlaceholder
+
                 title="لوحة إدارة المنصة"
                 story="Admin Dashboard — EPIC-01 & EPIC-02"
               />
